@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,5 +13,13 @@ namespace Infrastructure.Data
         }
 
         public DbSet<Product> products {get ; set; }
+        public DbSet<ProductType> producttypes { get; set; }
+        public DbSet<ProductBrand> productbrands { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
     }
 }
