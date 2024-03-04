@@ -1,0 +1,16 @@
+<div class="card shadow-sm" *ngIf="product">
+
+  <img style="background-color: rgb(255, 234, 246);" src="{{product.pictureUrl}}" alt="{{product.name}}">
+
+  <div class="card-body d-flex flex-column">
+      <a href="" class="text-decoration-none">
+          <h6 class="" style="color: rgb(252, 95, 10);">{{product.name}}</h6>
+      </a>
+      <span class="mb-2">{{product.price | currency}}</span>
+
+      <div class="btn-group mt-auto">
+          <button class="btn btn-outline-danger"><i class="fa fa-eye"></i></button>
+          <button class="btn btn-outline-warning"><i class="fa fa-shopping-cart"></i></button>
+      </div>
+  </div>
+</div>
