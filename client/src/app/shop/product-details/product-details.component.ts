@@ -4,6 +4,8 @@ import { ShopService } from '../shop.service';
 import { ActivatedRoute } from '@angular/router';
 import { Breadcrumb } from 'xng-breadcrumb/lib/types/breadcrumb';
 import { BreadcrumbService } from 'xng-breadcrumb';
+import { BasketService } from 'src/app/basket/basket.service';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-product-details',
@@ -12,11 +14,14 @@ import { BreadcrumbService } from 'xng-breadcrumb';
 })
 export class ProductDetailsComponent implements OnInit {
 
-  product? : Product
+  product? : Product;
+  quantity = 1;
+  quantityInBasket = 0;
 
   constructor(private shopService : ShopService ,
               private activatedRoute : ActivatedRoute ,
-              private breadcrumbService : BreadcrumbService
+              private breadcrumbService : BreadcrumbService,
+              private basketService : BasketService
     ){
         this.breadcrumbService.set('@productDetails', ' ')
     }
@@ -30,12 +35,46 @@ export class ProductDetailsComponent implements OnInit {
     if(id) this.shopService.getProductDetail(+ id).subscribe({
       next : product => {
         this.product = product,
-        this.breadcrumbService.set('@productDetails', product.name)
+        this.breadcrumbService.set('@productDetails', product.name);
+        this.basketService.basketSource$.pipe(take(1)).subscribe({
+          next : basket => {
+            const item = basket?.items.find(x => x.id === +id);
+            if(item){
+              this.quantity = item.quantity;
+              this.quantityInBasket = item.quantity;
+            }
+          }
+        })
       },
       error : error => console.log("Lỗi getDetail SP :", error),
     })
 
 
+  }
+
+  incrementQuantity(){
+    this.quantity++;
+  }
+  decrementQuantity(){
+    this.quantity--;
+  }
+
+  updateBasket(){
+    if(this.product){
+      if(this.quantity > this.quantityInBasket){
+        const itemToAdd = this.quantity - this.quantityInBasket;
+        this.quantityInBasket += itemToAdd;
+        this.basketService.addItemToBasket(this.product , itemToAdd);
+      }else {
+        const itemsToRemove = this.quantityInBasket - this.quantity;
+        this.quantityInBasket -= itemsToRemove;
+        this.basketService.removeItemFromBasket(this.product.id , itemsToRemove);
+      }
+    }
+  }
+
+  get btuttonText(){
+    return this.quantityInBasket === 0 ? 'Add to basket' : 'Update basket';
   }
 
 }
